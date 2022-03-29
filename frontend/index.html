@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain</title>
+</head>
+<body>
+    <h1 id="message"></h1>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js"></script>    
+    <script>        
+        var web3, contract;        
+
+        const getWeb3 = () => {
+            return new Promise((resolve, reject) => {
+                window.addEventListener("load", async () => {
+                    web3 = new Web3("ws://localhost:7545");
+                    resolve(web3);
+                });
+            });
+        };
+
+        const getContract = async () => {            
+            let data = await fetch('HelloWorld.json')
+            .then(response => response.json());            
+            
+            contract = new web3.eth.Contract(
+                data.abi,
+                "0xB0A0479C9A27BdE176B9ddF327a51474f41774bd"
+            );
+            
+            return contract;
+        }
+
+        const displayGreeting = async () => {
+            const messageH1 = document.querySelector("#message");
+            let message = await contract.methods.sayHello().call();
+            messageH1.innerHTML = message;
+        }
+
+        const updateGreeting = async (newMessage) => {
+            const accounts = await web3.eth.getAccounts();
+            const owner = accounts[0];
+
+            await contract.methods
+                .updateGreeting(newMessage)
+                .send({ from: owner, gas: 40000 });
+
+            await displayGreeting();
+        }
+
+        async function greetingApp() {
+            web3 = await getWeb3();            
+            contract = await getContract();
+            
+            
+            displayGreeting();            
+        }
+
+        greetingApp();
+    </script>
+</body>
+</html>
