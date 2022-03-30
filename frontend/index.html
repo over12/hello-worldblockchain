@@ -12,6 +12,9 @@
     <script>        
         var web3, contract;        
 
+        /**
+         * Esse método vai instanciar o web3, permitindo que acesse os recursos da blockchain.
+         * */
         const getWeb3 = () => {
             return new Promise((resolve, reject) => {
                 window.addEventListener("load", async () => {
@@ -21,7 +24,18 @@
             });
         };
 
+        /**
+         * Método que vai retornar o nosso contrato.
+         * Nesse caso utilizamos o recurso web3.eth.Contract, para isso passamos
+         * 2 parametros, o ABI (que está no nosso arquivo) e o endereço, esse endereço
+         * foi gerado na tela anterior quando utilizamos o "truffle migrate"
+         * */
         const getContract = async () => {            
+            /* 
+            precisamos acessar nosso arquivo compilado que está na pasta 
+            build/contracts (para esse teste utilize o arquivo index.html dentro de um
+            ambiente como exemplo, xampp ou algo parecido.)
+            */
             let data = await fetch('HelloWorld.json')
             .then(response => response.json());            
             
@@ -33,12 +47,23 @@
             return contract;
         }
 
+        /**
+         * Esse método recupera o que temos na variavel greeting no contrato
+         * quando queremos usar métodos que são do tipo "view" que retornará apenas
+         * valores e nao mudará nada, usamos o método .call()
+         * */
         const displayGreeting = async () => {
             const messageH1 = document.querySelector("#message");
             let message = await contract.methods.sayHello().call();
             messageH1.innerHTML = message;
         }
 
+        /**
+         * Esse método altera o que temos na variavel greeting no contrato
+         * no caso quando usamos funções que altera o estado de variaveis e outros itens no contrato
+         * utilizamos o recurso .send(), um outro detalhe, nessa transação precisamos pagar a taxa de 
+         * gas, que é o custo de processar alguma coisa na blockchain
+         * */
         const updateGreeting = async (newMessage) => {
             const accounts = await web3.eth.getAccounts();
             const owner = accounts[0];
